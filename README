@@ -1,0 +1,171 @@
+NAME
+    getwebsite - a website spider
+
+SYNOPSIS
+    getwebsite [options] website [target]
+
+  OPTIONS
+    -h, --help
+        Prints a brief help message.
+
+    -m, --man
+        Prints a full documentation of this script.
+
+    -c, --convert-links
+        If set, this scripts rewrites the links of the downloaded sites.
+
+    -d, --depth
+        Set the maximum download deep for the website. Defaults to 0.
+
+    -q, --quiet
+        Turns off all output messages.
+
+    --debug
+        Turns on all debug messages.
+
+DESCRIPTION
+    This programm will download the given website and its media.
+
+ABOUT
+    Author: Sven Walter
+
+    E-Mail: sven.walter@wltr.eu
+
+    Version: 1.0.beta
+
+SOURCECODE
+  HINTS
+    Variable name 'au' menas 'analyzed url'.
+    Variable name 'fu' means 'found url'.
+    Variables starting with an 'r' are references.
+
+  GLOBAL VARS
+    %opts
+        Stores als CLI arguments.
+
+    $browser
+        A LWP instance.
+
+    %au_hash
+        Contains all always downloaded 'au's. See &analyze_url for further
+        information.
+
+    @replacement_list
+        A help variable for link converting. See &find_urls and
+        &convert_links.
+
+  PARSING COMMANDLINE
+    This part parses the commandline arguments and stores them in the global
+    hash %opts.
+
+    Hash keys are 'depth', 'convert', 'debug', 'quiet', 'url' and 'target'.
+
+  MAIN
+    This part starts the script and initiates the first start of
+    &get_website.
+
+  get_website
+    Manages the download of an URL and its media. Also, it starts the
+    searching for new links.
+
+   ARGS
+    $rau - referenced analyzed url; see &analyze_url for further information
+
+    $depth - current crawling depth
+
+   RETURN
+    Nothing.
+
+  http_download
+    Downloads and returns the given resource.
+
+   ARGS
+    $rau - referenced analyzed url; see &analyze_url for further information
+
+   RETURN
+    Contents of $rau destination.
+
+  find_urls
+    Searches in the HTML source code ($_) for links and returns them.
+
+   ARGS
+    $prau - parent reference analyzed url; see analyze_url
+
+    $_ - html source code
+
+   RETURN
+    A list of hashes with URL information. These hashes have the keys
+    'type', 'au', 'search' and maybe 'name'. This hash is called 'fu' in
+    some parts.
+
+  analyze_url
+    Analyzes an URL and extract some information.
+
+   ARGS
+    $raw - the raw URL; given in the href attribute for example
+
+    $prau - the analyzed url from parent
+
+   RETURN
+    A hash with the following keys: 'raw', 'href', 'url', 'scheme', 'base',
+    'domain', 'path', 'dirname' and 'filename'.
+
+  convert_links
+    Iterates over all links in %au_hash and replaces all possible links.
+
+   ARGS
+    None.
+
+   RETURN
+    Nothing.
+
+  make_relative_to
+    Makes the path $path related to the file or directory $related. That
+    means you can access $pathi relative, if you are in the directory of
+    $related.
+
+   ARGS
+    $path - the path that will be made relative
+
+    $related - the related path
+
+   RETURN
+    The relative path.
+
+  usage_error
+    Prints an error message to STDERR, prints usage and exits with error
+    code 1.
+
+   ARGS
+    $_ - the message
+
+   RETURN
+    Nothing.
+
+  runtime_error
+    Prints an error message and exits with error code 1.
+
+   ARGS
+    $_ - the message
+
+   RETURN
+    Nothing.
+
+  print_debug
+    Prints a debug message, if the flag is set.
+
+   ARGS
+    @_ - the message
+
+   RETURN
+    Nothing.
+
+  print_info
+    Prints a info message, unless the quiet flag is set.
+
+   ARGS
+    @_ - the message
+
+   RETURN
+    Nothing.
+
