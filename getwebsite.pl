@@ -1,73 +1,18 @@
 #!/usr/bin/perl
-=pod
-
-=head1 NAME
-
-getwebsite - a website spider
-
-=head1 SYNOPSIS
-
-getwebsite [options] website [target]
-
-=head2 OPTIONS
-
-=over 4
-
-=item -h, --help
-
-Prints a brief help message.
-
-=item -m, --man
-
-Prints a full documentation of this script.
-
-=item -c, --convert-links
-
-If set, this scripts rewrites the links of the downloaded sites.
-
-=item -d, --depth
-
-Set the maximum download deep for the website. Defaults to 0.
-
-=item -q, --quiet
-
-Turns off all output messages.
-
-=item --debug
-
-Turns on all debug messages.
-
-=back
- 
-=head1 DESCRIPTION
-
-This programm will download the given website and its media. 
-
-=head1 ABOUT
-
-B<Author:> Sven Walter
-
-B<E-Mail:> sven.walter@wltr.eu
-
-B<Version:> 1.0.beta
-
-=head1 SOURCECODE
-
-=head2 HINTS
-
-=over 4
-
-=item Variable name 'au' menas 'analyzed url'.
-
-=item Variable name 'fu' means 'found url'.
-
-=item Variables starting with an 'r' are references.
-
-=back
-
-=cut
-
-
+#
+# getwebsite.pl - a website spider
+#
+#  @author: Sven Walter <sven.walter@wltr.eu>
+#  @date: 25.06.2012
+#  @url: https://github.com/svenwltr/getwebsite
+#
+# For more information see POD at bottom.
+#
+# Source code hints:
+#  * Variable name 'au' menas 'analyzed url'.
+#  * Variable name 'fu' means 'found url'.
+#  * Variables starting with an 'r' are references.
+#
 
 
 use strict;
@@ -84,47 +29,24 @@ use Cwd qw(abs_path);
 use Term::ANSIColor;
 
 
-=pod
 
-=head2 GLOBAL VARS
+# Stores als CLI arguments.
+my %opts = ();
 
-=over 4
-
-=item %opts
-
-Stores als CLI arguments.
-
-=item $browser
-
-A LWP instance.
-
-=item %au_hash
-
-Contains all always downloaded 'au's. See &analyze_url for further information.
-
-=item @replacement_list
-
-A help variable for link converting. See &find_urls and &convert_links.
-
-=back
-
-=cut
-my %opts = (); # cli arguments
+# A LWP instance.
 my $browser = LWP::UserAgent->new();
-my %au_hash = (); # already downloaded urls
-my @replacement_list; # replacements for links convertion
+
+# Contains all always downloaded 'au's. See &analyze_url for further information.
+my %au_hash = ();
+
+# A help variable for link converting. See &find_urls and &convert_links.
+my @replacement_list;
 
 
-=pod
-
-=head2 PARSING COMMANDLINE
-
-This part parses the commandline arguments and stores them in the global
-hash %opts.
-
-Hash keys are 'depth', 'convert', 'debug', 'quiet', 'url' and 'target'.
-
-=cut
+#
+# This part parses the commandline arguments and stores them in the global
+# hash %opts.
+#
 {
     # default values
     $opts{'depth'} = 0;
@@ -151,13 +73,9 @@ Hash keys are 'depth', 'convert', 'debug', 'quiet', 'url' and 'target'.
 }
 
 
-=pod
-
-=head2 MAIN
-
-This part starts the script and initiates the first start of &get_website.
-
-=cut
+#
+# This part starts the script and initiates the first start of &get_website.
+#
 {
     my %au = &analyze_url($opts{'url'});
     &get_website(\%au, $opts{'depth'});
@@ -169,24 +87,18 @@ This part starts the script and initiates the first start of &get_website.
 }
 
 
-=pod
 
-=head2 get_website
-
-Manages the download of an URL and its media. Also, it starts the
-searching for new links.
-
-=head3 ARGS
-
-$rau - referenced analyzed url; see &analyze_url for further information
-
-$depth - current crawling depth
-
-=head3 RETURN
-
-Nothing.
-
-=cut
+#
+# get_website
+#  Manages the download of an URL and its media. Also, it starts the
+#  searching for new links.
+#
+# ARGS
+#  * $rau - referenced analyzed url; see &analyze_url for further information
+#  * $depth - current crawling depth
+#
+# RETURN
+#  Nothing.
 sub get_website {
     my ($rau, $depth) = @_;
     $depth--;
@@ -210,21 +122,16 @@ sub get_website {
 }
 
 
-=pod
-
-=head2 http_download
-
-Downloads and returns the given resource.
-
-=head3 ARGS
-
-$rau - referenced analyzed url; see &analyze_url for further information
-
-=head3 RETURN
-
-Contents of $rau destination.
-
-=cut
+#
+# http_download
+#  Downloads and returns the given resource.
+#
+# ARGS
+#  * $rau - referenced analyzed url; see &analyze_url for further information
+#
+# RETURN
+#  * Contents of $rau destination.
+#
 sub download_file {
     my ($rau) = @_;
     my $url = $rau->{"url"};
@@ -261,24 +168,18 @@ sub download_file {
 }
 
 
-=pod
-
-=head2 find_urls
-
-Searches in the HTML source code ($_) for links and returns them.
-
-=head3 ARGS
-
-$prau - parent reference analyzed url; see analyze_url
-
-$_ - html source code
-
-=head3 RETURN
-
-A list of hashes with URL information. These hashes have the keys 'type', 'au',
-'search' and maybe 'name'. This hash is called 'fu' in some parts.
-
-=cut
+#
+# find_urls
+#  Searches in the HTML source code ($_) for links and returns them.
+#
+# ARGS
+#  * $prau - parent reference analyzed url; see analyze_url
+#  * $_ - html source code
+#
+# RETURN
+#  A list of hashes with URL information. These hashes have the keys 'type', 'au',
+#  'search' and maybe 'name'. This hash is called 'fu' in some parts.
+#
 sub find_urls {
     my ($prau, $_) = @_;
     $/ = undef;
@@ -324,24 +225,18 @@ sub find_urls {
 }
 
 
-=pod
-
-=head2 analyze_url
-
-Analyzes an URL and extract some information.
-
-=head3 ARGS
-
-$raw - the raw URL; given in the href attribute for example
-
-$prau - the analyzed url from parent
-
-=head3 RETURN
-
-A hash with the following keys: 'raw', 'href', 'url', 'scheme', 'base',
-'domain', 'path', 'dirname' and 'filename'.
-
-=cut
+#
+# analyze_url
+#  Analyzes an URL and extract some information.
+#
+# ARGS
+#  * $raw - the raw URL; given in the href attribute for example
+#  * $prau - the analyzed url from parent
+#
+# RETURN
+#  A hash with the following keys: 'raw', 'href', 'url', 'scheme', 'base',
+#  'domain', 'path', 'dirname' and 'filename'.
+#
 sub analyze_url {
     # prau: parent reference analyzed url ;-)
     my ($raw, $prau) = @_;
@@ -406,21 +301,16 @@ sub analyze_url {
 }
 
 
-=pod
-
-=head2 convert_links
-
-Iterates over all links in %au_hash and replaces all possible links.
-
-=head3 ARGS
-
-None.
-
-=head3 RETURN
-
-Nothing.
-
-=cut
+#
+# convert_links
+#  Iterates over all links in %au_hash and replaces all possible links.
+#
+# ARGS
+#  None.
+#
+# RETURN
+#  Nothing.
+#
 sub convert_links {
     $/ = undef;
     &print_debug("\n\nStart link converting.\n\n");
@@ -457,24 +347,18 @@ sub convert_links {
 }
 
 
-=pod
-
-=head2 make_relative_to
-
-Makes the path $path related to the file or directory $related. That means you
-can access $pathi relative, if you are in the directory of $related.
-
-=head3 ARGS
-
-$path - the path that will be made relative
-
-$related - the related path
-
-=head3 RETURN
-
-The relative path.
-
-=cut
+#
+# make_relative_to
+#  Makes the path $path related to the file or directory $related. That means you
+#  can access $pathi relative, if you are in the directory of $related.
+#
+# ARGS
+#  * $path - the path that will be made relative
+#  * $related - the related path
+#
+# RETURN
+#  The relative path.
+#
 sub make_relative_to {
     my ($path, $related) = @_;
     
@@ -514,21 +398,16 @@ sub make_relative_to {
 }
 
 
-=pod
-
-=head2 usage_error
-
-Prints an error message to STDERR, prints usage and exits with error code 1.
-
-=head3 ARGS
-
-$_ - the message
-
-=head3 RETURN
-
-Nothing.
-
-=cut
+#
+# usage_error
+#  Prints an error message to STDERR, prints usage and exits with error code 1.
+#
+# ARGS
+#  $_ - the message
+#
+# RETURN
+#  Nothing.
+#
 sub usage_error {
     if($_[0]) {
         print STDERR "\n", $_[0], "\n\n";
@@ -538,42 +417,31 @@ sub usage_error {
 }
 
 
-=pod
-
-=head2 runtime_error
-
-Prints an error message and exits with error code 1.
-
-=head3 ARGS
-
-$_ - the message
-
-=head3 RETURN
-
-Nothing.
-
-=cut
+#
+# runtime_error
+#  Prints an error message and exits with error code 1.
+#
+# ARGS
+#  * $_ - the message
+#
+# RETURN
+#  Nothing.
+#
 sub runtime_error {
     print STDERR "\n", $_[0], "\n";
     exit 1;
 }
 
 
-=pod
-
-=head2 print_debug
-
-Prints a debug message, if the flag is set.
-
-=head3 ARGS
-
-@_ - the message
-
-=head3 RETURN
-
-Nothing.
-
-=cut
+#
+# print_debug
+#  Prints a debug message, if the flag is set.
+#
+# ARGS
+#  * @_ - the message
+#
+# RETURN
+#  Nothing.
 sub print_debug {
     if($opts{'debug'}) {
         print color("blue"), "DEBUG: ", @_, color("reset");
@@ -581,26 +449,66 @@ sub print_debug {
 }
 
 
-=pod
-
-=head2 print_info
-
-Prints a info message, unless the quiet flag is set.
-
-=head3 ARGS
-
-@_ - the message
-
-=head3 RETURN
-
-Nothing.
-
-=cut
+#
+# print_info
+#  Prints a info message, unless the quiet flag is set.
+#
+# ARGS
+#  @_ - the message
+#
+# RETURN
+#  Nothing.
+#
 sub print_info {
     unless($opts{'quiet'}) {
         print @_;
     }
 }
 
+# POD
 
+=pod
 
+=head1 NAME
+
+getwebsite - a website spider
+
+=head1 SYNOPSIS
+
+getwebsite [options] website [target]
+
+=head2 OPTIONS
+
+=over 4
+
+=item -h, --help
+
+Prints a brief help message.
+
+=item -m, --man
+
+Prints a full documentation of this script.
+
+=item -c, --convert-links
+
+If set, this scripts rewrites the links of the downloaded sites.
+
+=item -d, --depth
+
+Set the maximum download deep for the website. Defaults to 0.
+
+=item -q, --quiet
+
+Turns off all output messages.
+
+=item --debug
+
+Turns on all debug messages.
+
+=back
+ 
+=head1 DESCRIPTION
+
+This programm will download the given website and its media. 
+
+=cut
